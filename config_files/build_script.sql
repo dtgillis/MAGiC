@@ -3,7 +3,7 @@ PRAGMA foreign_keys = ON;
 create table gwas_methyl_lookup (
     id integer primary key autoincrement,
     methyl_sample_id integer unique,
-    gwas_sample_id integer unique,
+    gwas_sample_id integer unique
 );
 
 create table methyl_probe_name_lookup (
@@ -15,14 +15,14 @@ create table methyl_probe (
     gwas_methyl_lookup_id integer,
     probe_id integer,
     beta_value float,
-    UNIQUE(gwas_methyl_lookup_id, probe_name, beta_value),
-    FOREIGN KEY(gwas_methyl_lookup_id) REFERENCES gwas_methyl_lookup(id)
+    UNIQUE(gwas_methyl_lookup_id, probe_id),
+    FOREIGN KEY(gwas_methyl_lookup_id) REFERENCES gwas_methyl_lookup(id),
     FOREIGN KEY(probe_id) REFERENCES methyl_probe_name_lookup(id)
 );
 
 create table snp_name_lookup (
-    if integer primary key autoincrement,
-    snp_name text unique,
+    id integer primary key autoincrement,
+    snp_name text unique
 );
 
 create table genotype (
@@ -30,13 +30,16 @@ create table genotype (
     gwas_methyl_lookup_id integer,
     genotype integer,
     snp_id integer,
-    UNIQUE(gwas_methyl_lookup_id, snp_name),
-    FOREIGN KEY(gwas_methyl_lookup_id) REFERENCES gwas_methyl_lookup(id)
+    UNIQUE(gwas_methyl_lookup_id, snp_id),
+    FOREIGN KEY(gwas_methyl_lookup_id) REFERENCES gwas_methyl_lookup(id),
     FOREIGN KEY(snp_id) REFERENCES snp_name_lookup(id)
 );
 
 create table gemes (
     id integer primary key autoincrement,
     probe_id integer,
-    genotype_id integer,
+    snp_id integer,
+    FOREIGN KEY (probe_id) REFERENCES methyl_probe_name_lookup(id),
+    FOREIGN KEY (snp_id) REFERENCES snp_name_lookup(id),
+    UNIQUE(probe_id, snp_id)
 );

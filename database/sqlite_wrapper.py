@@ -56,7 +56,7 @@ class SqliteConnector():
             self.connect_to_database()
         try:
             if len(statements) > 0:
-                self.connection.executemany()
+                self.connection.executemany(statements[0], statements[1])
             else:
                 print "No statements for writing to the db"
         except Exception as e:
@@ -76,7 +76,7 @@ class SqliteConnector():
             self.connect_to_database()
         try:
             if len(statement) > 0:
-                self.connection.executemany()
+                self.connection.execute(statement[0], statement[1])
             else:
                 print "No statements for writing to the db"
         except Exception as e:
@@ -84,6 +84,29 @@ class SqliteConnector():
             self.connection.rollback()
         finally:
             self.connection.commit()
+
+    def execute_single_lookup(self, statement):
+        """
+        :param statement: Should be a list of tuples like ("SQL STATEMENT ???",(values))
+        :return: no return
+        """
+        if not self.connected:
+            self.connect_to_database()
+        try:
+            if len(statement) > 0:
+                results = self.connection.execute(statement[0], statement[1]).fetchall()
+                if len(results) > 0:
+                    #only one results
+                    if len(results) == 1:
+                        return results[0]
+                    # multiple results
+                    else:
+                        return results
+            else:
+                print "No statements for lookup"
+        except Exception as e:
+            print e.message
+
 
     def execute_sql_script(self, script):
         """
@@ -93,14 +116,13 @@ class SqliteConnector():
 
         if not self.connected:
             self.connect_to_database()
-        else:
-            try:
-                self.connection.executescript(script)
-            except Exception as e:
-                print e.message
-                self.connection.rollback()
-            finally:
-                self.connection.commit()
+        try:
+            self.connection.executescript(script)
+        except Exception as e:
+            print e.message
+            self.connection.rollback()
+        finally:
+            self.connection.commit()
 
 
 class SqliteWriter():
@@ -119,4 +141,20 @@ class SqliteWriter():
             self.db_connection.execute_many_statements(statement)
         else:
             self.db_connection.execute_single_write(statement)
+
+
+class SqliteLookup():
+
+    def __init__(self, db_connection):
+
+        assert isinstance(db_connection, SqliteConnector)
+        self.db_connection = db_connection
+
+    #TODO convineince function should know number of result fields to return.
+    def execute_lookup(self, statement):
+
+        return self.db_connection.execute_single_lookup(statement)
+
+
+
 
