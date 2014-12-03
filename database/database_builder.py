@@ -2,7 +2,8 @@ __author__ = 'dtgillis'
 
 import sqlite_wrapper
 import os
-
+from methylation.methylation_reader import MethylationParser
+import sys
 
 class DatabaseBuilder():
     """
@@ -154,6 +155,97 @@ class DatabaseBuilder():
 
         gemes_sql = 'insert into gemes(probe_id,snp_id) values (?,?)'
         sqlite_writer.execute_statement((gemes_sql, gemes_records), multiple_statements=True)
+
+    def write_genotype_records(self, sample_genotype_list):
+
+        sqlite_seeker = self.get_database_seeker()
+
+        snp_id = sqlite_seeker.snp_id_lookup(sample_genotype_list[0].snp_name)
+
+        insert_records = []
+
+        for sample_genotype in sample_genotype_list:
+
+            gwas_methyl_id = sqlite_seeker.gwas_methyl_lookup_table_search(sample_genotype.sample_name)
+
+            if gwas_methyl_id is not None:
+
+                insert_records.append((gwas_methyl_id, sample_genotype.genotype, snp_id))
+
+        sqlite_writer = self.get_database_writer()
+
+        sql = 'insert into genotype(gwas_methyl_lookup_id, genotype, snp_id) values(?,?,?)'
+
+        sqlite_writer.execute_statement((sql, insert_records), multiple_statements=True)
+
+
+    def fill_methylation_probe_table(self, methylation_parser):
+
+        assert isinstance(methylation_parser, MethylationParser)
+
+        sqlite_lookup = self.get_database_seeker()
+
+        samples = methylation_parser.get_methylation_sample_names()
+
+        gwas_methyl_lookup_dict = dict()
+
+        for sample in samples:
+
+            gwas_methyl_lookup_id = sqlite_lookup.gwas_methyl_lookup_table_search(sample, by_gwas=False)
+
+            if gwas_methyl_lookup_id is not None:
+
+                gwas_methyl_lookup_dict[sample] = gwas_methyl_lookup_id
+
+        probe_records = []
+
+        sqlite_writer = self.get_database_writer()
+        sql = 'insert into methyl_probe(gwas_methyl_lookup_id, probe_id, beta_value) values (?,?,?)'
+
+        for probe_line in methylation_parser.read_methylation_probe_info():
+
+            if len(probe_records) % 10000 == 0 and len(probe_records)!= 0:
+                sys.stdout.write(".")
+            if len(probe_records) % 100000 == 0 and len(probe_records) != 0:
+                # write to database as to not fill memory too much
+                sys.stdout.write(os.linesep)
+                sqlite_writer.execute_statement((sql, probe_records), multiple_statements=True)
+                print "Wrote {0:d} records to database".format(len(probe_records))
+                probe_records = []
+
+            fields = probe_line.strip(os.sep).replace('\"', '').split()
+
+            probe_id = sqlite_lookup.methyl_probe_id_lookup(fields[0])
+
+            beta_values = fields[1:]
+
+            if probe_id is None:
+                continue
+
+            for i in range(len(samples)):
+
+                if samples[i] in gwas_methyl_lookup_dict:
+
+                    gwas_methyl_lookup_id = int(gwas_methyl_lookup_dict[samples[i]])
+
+                    beta_value = float(beta_values[i])
+
+                    probe_records.append((gwas_methyl_lookup_id, int(probe_id), beta_value))
+
+        if len(probe_records) > 0:
+            sqlite_writer.execute_statement((sql, probe_records), multiple_statements=True)
+            print "Wrote {0:d} records to database".format(len(probe_records))
+
+
+
+
+
+
+
+
+
+
+
 
 
 

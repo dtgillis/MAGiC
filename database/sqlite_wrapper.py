@@ -155,6 +155,49 @@ class SqliteLookup():
 
         return self.db_connection.execute_single_lookup(statement)
 
+    def snp_id_lookup(self, snp_name):
+
+        snp_name_sql = 'select id from snp_name_lookup where snp_name = ?'
+
+        snp_name_result = self.execute_lookup((snp_name_sql, [snp_name]))
+
+        if snp_name_result is not None:
+            return int(snp_name_result[0])
+        else:
+            return None
+
+
+
+    def methyl_probe_id_lookup(self, probe_name):
+        #sql for methyl probe name
+        methyl_probe_name_sql = 'select id from methyl_probe_name_lookup where probe_name = ?'
+
+        methyl_probe_result = self.execute_lookup((methyl_probe_name_sql, [probe_name]))
+
+        if methyl_probe_result is not None:
+            return int(methyl_probe_result[0])
+        else:
+            return None
+
+    def gwas_methyl_lookup_table_search(self, sample_name, by_gwas=True):
+
+        if by_gwas:
+            sql = 'select id from gwas_methyl_lookup where gwas_sample_id = ?'
+        else:
+            sql = 'select id from gwas_methyl_lookup where methyl_sample_id = ?'
+
+        sample_result = self.execute_lookup((sql, [sample_name]))
+        if sample_result is not None:
+            return int(sample_result[0])
+        else:
+            return None
+
+    def get_distinct_gemes_snps(self):
+
+        sql = 'select distinct g.snp_id,snl.snp_name from gemes as g join snp_name_lookup snl where snl.id=g.snp_id'
+
+        return self.execute_lookup((sql, []))
+
 
 
 

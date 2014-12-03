@@ -1,10 +1,10 @@
 __author__ = 'dtgillis'
 
-import database.sqlite_wrapper
 from database.database_builder import DatabaseBuilder
 import argparse
 import ConfigParser
 import os
+from methylation.methylation_reader import MethylationParser
 
 
 def build_database():
@@ -40,8 +40,11 @@ def build_database():
     builder.fill_snp_name_lookup(plink_map_file)
     builder.fill_gemes_table(config.get("Data Files", "gemes_file"))
 
+    beta_file_path = config.get("Data Files", "beta_file_directory") + os.sep + config.get("Data Files", "beta_file")
 
+    methylation_parser = MethylationParser(beta_file_path)
 
+    methylation_parser.create_methylation_file_index()
 
 
 if __name__ == '__main__':
