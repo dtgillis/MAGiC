@@ -36,7 +36,7 @@ class PlinkExecutableWrapper():
 
         #form the command for the plink execution
         cmd = '{0:s} --noweb --ped {1:s} --map {2:s} --map3 --no-pheno --recodeA --snp {3:s}' \
-              ' --out {4:s}{5:s}{3:s}'.format(self.plink_exec, ped_file, map_file, snp, tmp_dir, os.sep)
+              ' --out {4:s}{5:s}{3:s} > /dev/null'.format(self.plink_exec, ped_file, map_file, snp, tmp_dir, os.sep)
         os.system(cmd)
 
     def parse_snp_recode_raw(self, snp, tmp_dir):

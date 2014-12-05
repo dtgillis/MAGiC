@@ -51,7 +51,7 @@ def run_logistic_regression():
     sqlite_seeker = SqliteLookup(db_connect)
     methyl_parser = MethylationParser(beta_file)
     snp_list = sqlite_seeker.get_distinct_gemes_snps()
-    data_out = []
+
     for snp_tuple in snp_list:
 
         #TODO implement an actual tmp directory choice in cfg
@@ -63,21 +63,11 @@ def run_logistic_regression():
         else:
             pearson_r_2 = .0
 
-        data_out.append((snp_tuple[-1], pearson_r_2))
+        out_file = open(work_dir + os.sep + "log_reg_gemes.dat", 'a')
 
-    out_file = open(work_dir + os.sep + "log_reg_gemes.dat", 'w')
-    for data in data_out:
+        out_file.write('{0:s} {1:f}'.format(snp_tuple[-1], pearson_r_2))
 
-        out_file.write('{0:s} {1:f}'.format(data[0], data[1]))
-
-    out_file.close()
-
-
-
-
-
-
-
+        out_file.close()
 
 if __name__ == '__main__':
 
