@@ -10,6 +10,8 @@ from machine_learning.data_builder import GeMesDataSetFactory
 from magic.methylation.methylation_reader import MethylationParser
 from magic.plink.plink_wrapper import PlinkExecutableWrapper
 from magic.machine_learning.learning import LogisticRegressor
+import sys
+import time
 
 
 def run_logistic_regression():
@@ -51,8 +53,18 @@ def run_logistic_regression():
     sqlite_seeker = SqliteLookup(db_connect)
     methyl_parser = MethylationParser(beta_file)
     snp_list = sqlite_seeker.get_distinct_gemes_snps()
-
+    snp_count = 0
+    start_time = time.clock()
     for snp_tuple in snp_list:
+        if snp_count % 10 == 0 and snp_count != 0:
+            sys.stdout.write(".")
+        if snp_count % 100 == 0 and snp_count != 0:
+            print "((((((((((((((((())))))))))))))))))))"
+            print "% Processed {0:d} snps of {1:d} %".format(snp_count, len(snp_list))
+            print "% in {0:d} secs of compute time %".format(int(time.clock() - start_time))
+            print "((((((((((((((((())))))))))))))))))))"
+
+
 
         #TODO implement an actual tmp directory choice in cfg
         gemes_factory = GeMesDataSetFactory(db_connect, methyl_parser, plink_exec, ped_file, map_file, work_dir)
