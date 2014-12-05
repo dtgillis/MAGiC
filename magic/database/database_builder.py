@@ -1,9 +1,12 @@
+from magic.database import sqlite_wrapper
+
 __author__ = 'dtgillis'
 
-import sqlite_wrapper
 import os
-from methylation.methylation_reader import MethylationParser
 import sys
+
+from magic.methylation.methylation_reader import MethylationParser
+
 
 class DatabaseBuilder():
     """

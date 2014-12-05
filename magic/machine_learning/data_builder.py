@@ -1,11 +1,13 @@
 __author__ = 'dtgillis'
 
-from database.sqlite_wrapper import SqliteConnector
-from database.sqlite_wrapper import SqliteLookup
-from methylation.methylation_reader import MethylationParser
 import os
-from plink.plink_wrapper import PlinkExecutableWrapper
+
 import numpy as np
+
+from magic.database.sqlite_wrapper import SqliteConnector
+from magic.database.sqlite_wrapper import SqliteLookup
+from magic.methylation.methylation_reader import MethylationParser
+from magic.plink.plink_wrapper import PlinkExecutableWrapper
 
 
 class MethylData():

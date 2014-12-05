@@ -1,10 +1,11 @@
 __author__ = 'dtgillis'
 
-from database.database_builder import DatabaseBuilder
 import argparse
 import ConfigParser
 import os
-from methylation.methylation_reader import MethylationParser
+
+from magic.database.database_builder import DatabaseBuilder
+from magic.methylation.methylation_reader import MethylationParser
 
 
 def build_database():

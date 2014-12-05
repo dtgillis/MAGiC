@@ -3,13 +3,14 @@ __author__ = 'dtgillis'
 import argparse
 import ConfigParser
 import os
-import sklearn
-from database.sqlite_wrapper import SqliteConnector
-from database.sqlite_wrapper import SqliteLookup
+
+from magic.database.sqlite_wrapper import SqliteConnector
+from magic.database.sqlite_wrapper import SqliteLookup
 from machine_learning.data_builder import GeMesDataSetFactory
-from methylation.methylation_reader import MethylationParser
-from plink.plink_wrapper import PlinkExecutableWrapper
-from machine_learning.learning import LogisticRegressor, DTC
+from magic.methylation.methylation_reader import MethylationParser
+from magic.plink.plink_wrapper import PlinkExecutableWrapper
+from magic.machine_learning.learning import LogisticRegressor
+
 
 def run_logistic_regression():
 
