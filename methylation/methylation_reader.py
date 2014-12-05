@@ -65,9 +65,11 @@ class MethylationParser():
     def get_probe_data_by_name(self, probe_name):
 
         if probe_name in self.data_idx:
-            fseek = self.data_idx[probe_name]
 
-            probe_line = self.get_fp_beta_file().seek(fseek).readline()
+            fseek = self.data_idx[probe_name]
+            beta_fp = self.get_fp_beta_file()
+            beta_fp.seek(fseek)
+            probe_line = beta_fp.readline()
 
             return probe_line
 

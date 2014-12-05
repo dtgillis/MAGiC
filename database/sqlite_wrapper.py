@@ -104,6 +104,7 @@ class SqliteConnector():
                         return results
             else:
                 print "No statements for lookup"
+
         except Exception as e:
             print e.message
 
@@ -166,8 +167,6 @@ class SqliteLookup():
         else:
             return None
 
-
-
     def methyl_probe_id_lookup(self, probe_name):
         #sql for methyl probe name
         methyl_probe_name_sql = 'select id from methyl_probe_name_lookup where probe_name = ?'
@@ -179,6 +178,17 @@ class SqliteLookup():
         else:
             return None
 
+    def methyl_probe_name_lookup(self, methyl_id):
+
+        #sql for methyl probe name
+        methyl_probe_name_sql = 'select probe_name from methyl_probe_name_lookup where id = ?'
+
+        methyl_probe_result = self.execute_lookup((methyl_probe_name_sql, [methyl_id]))
+
+        if methyl_probe_result is not None:
+            return str(methyl_probe_result[0])
+        else:
+            return None
     def gwas_methyl_lookup_table_search(self, sample_name, by_gwas=True):
 
         if by_gwas:
@@ -193,10 +203,32 @@ class SqliteLookup():
             return None
 
     def get_distinct_gemes_snps(self):
-
+        """
+        :return: list of tuples ( snp_id, snp_name) distinct gemes snps
+        """
         sql = 'select distinct g.snp_id,snl.snp_name from gemes as g join snp_name_lookup snl where snl.id=g.snp_id'
 
         return self.execute_lookup((sql, []))
+
+    def get_methyl_probes_in_geme_pair_by_snp_id(self, snp_id):
+
+        sql = 'select probe_id from gemes where snp_id=?'
+
+        results = self.execute_lookup((sql, [snp_id]))
+
+        return_list = []
+
+        if results is None:
+            return []
+
+        if len(results) == 1:
+            return results
+
+        for result in results:
+
+            return_list.append(int(result[0]))
+
+        return return_list
 
 
 

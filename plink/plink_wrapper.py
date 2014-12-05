@@ -5,10 +5,10 @@ import os
 
 class SampleGenotype():
 
-    def __init__(self, sample_name, genotype, snp_name):
+    def __init__(self, sample_list, genotype_list, snp_name):
 
-        self.sample_name = sample_name
-        self.genotype = genotype
+        self.sample_list = sample_list
+        self.genotype_list = genotype_list
         self.snp_name = snp_name
 
 
@@ -41,7 +41,6 @@ class PlinkExecutableWrapper():
 
     def parse_snp_recode_raw(self, snp, tmp_dir):
 
-        sample_genotype_list = []
         recode_file = tmp_dir + os.sep + snp + '.raw'
         if not os.path.isfile(recode_file):
             print "error reading plink file {0:s}".format(recode_file)
@@ -51,20 +50,24 @@ class PlinkExecutableWrapper():
 
         #splice out
         split_lines = [line.strip(os.linesep).split() for line in lines[1:]]
-
+        genotype_list = []
+        sample_list = []
         for record in split_lines:
 
             if record[-1] != 'NA':
-                sample_genotype_list.append(SampleGenotype(record[0], int(record[-1]), snp))
-            else:
-                sample_genotype_list.append(SampleGenotype(record[0], -1, snp))
+                sample_list.append(record[0])
+                genotype_list.append(int(record[-1]))
 
-        return sample_genotype_list
+
+        sample_genotype = SampleGenotype(sample_list, genotype_list, snp)
+
+        return sample_genotype
 
     def clean_up_directory(self, tmp_dir, snp):
 
         file_start = tmp_dir + os.sep + snp
         for ext in ['.raw', '.nof', '.log']:
-            os.remove(file_start + ext)
+            if os.path.isfile(file_start + ext):
+                os.remove(file_start + ext)
 
 
