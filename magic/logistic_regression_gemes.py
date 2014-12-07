@@ -77,7 +77,7 @@ def run_logistic_regression():
 
         out_file = open(work_dir + os.sep + "log_reg_gemes.dat", 'a')
 
-        out_file.write('{0:s} {1:f}'.format(snp_tuple[-1], pearson_r_2))
+        out_file.write('{0:s} {1:f}{2:s}'.format(snp_tuple[-1], pearson_r_2, os.linesep))
 
         out_file.close()
 
