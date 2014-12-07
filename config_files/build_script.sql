@@ -8,7 +8,10 @@ create table gwas_methyl_lookup (
 
 create table methyl_probe_name_lookup (
     id integer primary key autoincrement,
-    probe_name text unique
+    chrm text,
+    bp integer,
+    probe_name text unique,
+    UNIQUE(chrm, bp)
 );
 -- table will be too large
 -- create table methyl_probe (
@@ -23,7 +26,10 @@ create table methyl_probe_name_lookup (
 
 create table snp_name_lookup (
     id integer primary key autoincrement,
-    snp_name text unique
+    chrm text,
+    bp integer,
+    snp_name text unique,
+    UNIQUE(chrm, bp)
 );
 
 -- table will be too large

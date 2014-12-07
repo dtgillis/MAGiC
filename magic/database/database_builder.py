@@ -102,25 +102,35 @@ class DatabaseBuilder():
 
         sqlite_writer.execute_statement((sql, gwas_methyl_mapping), multiple_statements=True)
 
-    def fill_methyl_probe_name_lookup(self, beta_file):
+    def fill_methyl_probe_name_lookup(self, probe_lookup_mapping):
 
         sqlite_writer = self.get_database_writer()
 
-        methyl_probe_names = [[line.strip(os.linesep).split()[0].replace("\"", '')] for line in open(beta_file, 'r')]
+        methyl_probe_records = []
 
-        sql = "insert into methyl_probe_name_lookup (probe_name) values(?)"
+        chrms = [str(num) for num in range(1, 23)]
+        for line in open(probe_lookup_mapping, 'r'):
+            fields = line.strip(os.linesep).split(',')
 
-        sqlite_writer.execute_statement((sql, methyl_probe_names[1:]), multiple_statements=True)
+            if fields[3] in chrms:
+                methyl_probe_records.append([fields[0], fields[2], int(fields[3])])
+
+        sql = "insert into methyl_probe_name_lookup (probe_name, chrm, bp) values(?,?,?)"
+        sqlite_writer.execute_statement((sql, methyl_probe_records), multiple_statements=True)
 
     def fill_snp_name_lookup(self, plink_map_file):
 
         sqlite_writer = self.get_database_writer()
 
-        snp_names = [[line.strip(os.linesep).split()[1]] for line in open(plink_map_file, 'r')]
+        snp_records = []
 
-        sql = "insert into snp_name_lookup (snp_name) values(?)"
+        for line in open(plink_map_file, 'r'):
+            fields = line.strip(os.linesep).split()
+            snp_records.append([fields[1], fields[0], int(fields[2])])
 
-        sqlite_writer.execute_statement((sql, snp_names), multiple_statements=True)
+        sql = "insert into snp_name_lookup (snp_name, chrm, bp) values(?,?,?)"
+
+        sqlite_writer.execute_statement((sql, snp_records), multiple_statements=True)
 
     def fill_gemes_table(self, gemes_file):
 

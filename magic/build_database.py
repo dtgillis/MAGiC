@@ -35,7 +35,7 @@ def build_database():
     builder.fill_gwas_methyl_lookup_table(config.get("Data Files", "methyl_gwas_mapping"))
     print "Inserting records into methyl probe name lookup"
     beta_file = config.get("Data Files", "beta_file_directory") + os.sep + config.get("Data Files", "beta_file")
-    builder.fill_methyl_probe_name_lookup(beta_file)
+    builder.fill_methyl_probe_name_lookup(config.get("Data Files", "methyl_probe_loc_file"))
     print "Inserting records into snp name lookup"
     plink_map_file = config.get("Data Files", "plink_file_directory") + os.sep + config.get("Data Files", "plink_map_file")
     builder.fill_snp_name_lookup(plink_map_file)
