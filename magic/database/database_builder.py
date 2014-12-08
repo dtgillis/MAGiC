@@ -112,7 +112,7 @@ class DatabaseBuilder():
         for line in open(probe_lookup_mapping, 'r'):
             fields = line.strip(os.linesep).split(',')
 
-            if fields[3] in chrms:
+            if fields[2] in chrms:
                 methyl_probe_records.append([fields[0], fields[2], int(fields[3])])
 
         sql = "insert into methyl_probe_name_lookup (probe_name, chrm, bp) values(?,?,?)"
