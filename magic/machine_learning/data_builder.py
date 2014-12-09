@@ -210,7 +210,7 @@ class GeMesDataSetFactory():
             gwas_index, methyl_index = machine_data.pair_methyl_gwas_data()
 
             y = machine_data.get_snp_as_Y(gwas_index)
-            X = machine_data.get_methyl_as_X(methyl_index)
+            X, probe_list = machine_data.get_methyl_as_X(methyl_index)
 
             return y, X
         else:
