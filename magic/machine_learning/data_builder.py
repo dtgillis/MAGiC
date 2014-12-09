@@ -36,11 +36,13 @@ class MethylProbeDataFactory():
 
             tmp_data = self.parser.get_probe_data_by_name(probe)
 
-            fields = tmp_data.strip(os.sep).replace('\"', '').split()
+            if tmp_data is not None:
 
-            sample_list = self.parser.get_methylation_sample_names()
+                fields = tmp_data.strip(os.sep).replace('\"', '').split()
 
-            return_data.append(MethylData(fields[0], fields[1:], sample_list))
+                sample_list = self.parser.get_methylation_sample_names()
+
+                return_data.append(MethylData(fields[0], fields[1:], sample_list))
 
         return return_data
 
@@ -108,7 +110,8 @@ class MachineLearningData():
 
                     gwas_dict[gwas_methyl_id] = sample_count
                     gwas_set.add(gwas_methyl_id)
-                    sample_count += 1
+
+                sample_count += 1
 
             if len(self.methyl_probe_data) > 0:
 
@@ -121,7 +124,7 @@ class MachineLearningData():
 
                         methyl_dict[gwas_methyl_id] = sample_count
                         methyl_set.add(gwas_methyl_id)
-                        sample_count += 1
+                    sample_count += 1
 
                 in_both_sets = methyl_set.intersection(gwas_set)
                 # get list of samples in both lists
@@ -132,7 +135,8 @@ class MachineLearningData():
                 sorted_methyl_list = sorted(methyl_list, key=lambda items: items[0])
                 gwas_index = [index[-1] for index in sorted_gwas_list]
                 methyl_index = [index[-1] for index in sorted_methyl_list]
-
+                # print self.methyl_probe_data[0].sample_list[methyl_index[0]]
+                # print self.snp_data.sample_list[gwas_index[0]]
                 return gwas_index, methyl_index
             else:
                 print "No Probe Data Supplied?"
@@ -146,6 +150,8 @@ class MachineLearningData():
 
     def get_methyl_as_X(self, methyl_index):
 
+        probe_list = []
+
         n_cols = len(self.methyl_probe_data)
 
         methyl_np = np.zeros((len(methyl_index), n_cols))
@@ -155,9 +161,10 @@ class MachineLearningData():
         for methyl_data in self.methyl_probe_data:
 
             methyl_np[:, col_num] = np.array(methyl_data.probe_data)[methyl_index]
+            probe_list.append(methyl_data.probe_name)
             col_num += 1
 
-        return methyl_np
+        return methyl_np, probe_list
 
 
 class GeMesDataSetFactory():
@@ -209,6 +216,45 @@ class GeMesDataSetFactory():
         else:
             return None
 
+    #TODO make dataset abstract class to inherit
 
 
+class ChromeWideMethylationDataSet():
 
+    def __init__(self, db_connection, methyl_parser, plink_executable, plink_file, plink_map, tmp_dir):
+
+        assert isinstance(db_connection, SqliteConnector)
+        assert isinstance(methyl_parser, MethylationParser)
+        assert isinstance(plink_executable, PlinkExecutableWrapper)
+        self.db_connect = db_connection
+        self.sqlite_seeker = SqliteLookup(self.db_connect)
+        self.methyl_parser = methyl_parser
+        self.plink_executable = plink_executable
+        self.plink_file = plink_file
+        self.tmp_dir = tmp_dir
+        self.plink_map = plink_map
+
+    def get_chrome_wide_methyl_probes_by_snp_name(self, snp_name):
+
+        snp_desc = self.sqlite_seeker.snp_info_lookup(snp_name)
+
+        probe_names = self.sqlite_seeker.get_methyl_probes_by_chromosome(snp_desc[1])
+
+        probe_factory = MethylProbeDataFactory(probe_names, self.methyl_parser)
+
+        probe_data_list = probe_factory.get_probe_data()
+
+        snp_factory = GenotypeDataFactory(self.plink_executable, self.plink_file, self.plink_map, self.tmp_dir)
+
+        snp_data = snp_factory.get_snp_data(snp_name)
+
+        machine_data = MachineLearningData(probe_data_list, snp_data, self.db_connect)
+
+        gwas_index, methyl_index = machine_data.pair_methyl_gwas_data()
+
+        y = machine_data.get_snp_as_Y(gwas_index)
+
+        X, probe_names_out = machine_data.get_methyl_as_X(methyl_index)
+
+
+        return y, X, probe_names_out
