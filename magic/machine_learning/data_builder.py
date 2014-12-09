@@ -192,29 +192,30 @@ class GeMesDataSetFactory():
             methyl_ids = self.sqlite_seeker.get_methyl_probes_in_geme_pair_by_snp_id(snp_id)
 
             probe_names = []
+            if methyl_ids is not None:
 
-            for methyl_id in methyl_ids:
+                for methyl_id in methyl_ids:
 
-                probe_names.append(self.sqlite_seeker.methyl_probe_name_lookup(methyl_id))
+                    probe_names.append(self.sqlite_seeker.methyl_probe_name_lookup(methyl_id))
 
-            probe_factory = MethylProbeDataFactory(probe_names, self.methyl_parser)
+                probe_factory = MethylProbeDataFactory(probe_names, self.methyl_parser)
 
-            probe_data_list = probe_factory.get_probe_data()
+                probe_data_list = probe_factory.get_probe_data()
 
-            snp_factory = GenotypeDataFactory(self.plink_executable, self.plink_file, self.plink_map, self.tmp_dir)
+                snp_factory = GenotypeDataFactory(self.plink_executable, self.plink_file, self.plink_map, self.tmp_dir)
 
-            snp_data = snp_factory.get_snp_data(snp_name)
+                snp_data = snp_factory.get_snp_data(snp_name)
 
-            machine_data = MachineLearningData(probe_data_list, snp_data, self.db_connect)
+                machine_data = MachineLearningData(probe_data_list, snp_data, self.db_connect)
 
-            gwas_index, methyl_index = machine_data.pair_methyl_gwas_data()
+                gwas_index, methyl_index = machine_data.pair_methyl_gwas_data()
 
-            y = machine_data.get_snp_as_Y(gwas_index)
-            X, probe_list = machine_data.get_methyl_as_X(methyl_index)
+                y = machine_data.get_snp_as_Y(gwas_index)
+                X, probe_list = machine_data.get_methyl_as_X(methyl_index)
 
-            return y, X
+                return y, X
         else:
-            return None
+            return [], []
 
     #TODO make dataset abstract class to inherit
 
