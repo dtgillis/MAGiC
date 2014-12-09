@@ -22,29 +22,36 @@ def clean_pearsonr(y_true, y_predict):
 
 class LogisticRegressor():
 
-    def __init__(self):
+    def __init__(self, params=None):
 
         # self.folds = folds
-        self.log_regressor = lin_model.LogisticRegression(class_weight='auto')
+        if params is not None:
+            self.log_regressor = lin_model.LogisticRegression(C=float(params['C']), penalty=params['penalty'])
+        else:
+            self.log_regressor = lin_model.LogisticRegression()
+
 
     def grid_search(self, X, y):
 
         X = scale(X)
-        parameters = {'C': [.00001, .0001, .001, .01, .1, 10, 100, 1000, 10000, 1000000], 'penalty': ['l1', 'l2']}
-        clf = GridSearchCV(estimator=self.log_regressor, param_grid=parameters, n_jobs=5, cv=5, refit=True,
+        cv = StratifiedKFold(y=y, n_folds=5)
+        parameters = {'C': 10.0 ** np.arange(-2, 9), 'penalty': ['l1', 'l2']}
+        clf = GridSearchCV(estimator=self.log_regressor, param_grid=parameters, n_jobs=5, cv=cv, refit=True,
                            scoring=make_scorer(clean_pearsonr))
         clf.fit(X, y)
 
-        return clf.best_score_
+        return clf.best_score_, clf.best_params_
 
 
-
-    def fit_data(self, y, X):
+    def fit_data(self, y, X,):
 
         skf = StratifiedKFold(y, n_folds=5)
 
         pearsonr_list = []
         X = scale(X)
+
+        coeff_list = []
+
         for train_index, test_index in skf:
 
             x_train, y_train = X[train_index], y[train_index]
@@ -52,9 +59,22 @@ class LogisticRegressor():
 
             self.log_regressor.fit(X=x_train, y=y_train)
 
+            coeff_list.append(self.log_regressor.coef_)
+
             y_predict = self.log_regressor.predict(X=x_test)
 
             pearsonr_list.append(clean_pearsonr(y_test, y_predict))
+
+        coeff_dict = dict()
+
+        for i, coeff in enumerate(coeff_list):
+            for j, values in enumerate(coeff):
+                if j not in coeff_dict:
+                    coeff_dict[j] = np.zeros((len(coeff_list), len(values)))
+                coeff_dict[j][i, :] = values
+
+
+        return pearsonr_list, coeff_dict
 
 
 class DTC():

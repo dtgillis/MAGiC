@@ -167,6 +167,17 @@ class SqliteLookup():
         else:
             return None
 
+    def snp_info_lookup(self, snp_name):
+
+        snp_name_sql = 'select id, chrm, bp from snp_name_lookup where snp_name = ?'
+
+        snp_name_result = self.execute_lookup((snp_name_sql, [snp_name]))
+
+        if snp_name_result is not None:
+            return snp_name_result
+        else:
+            return None
+
     def methyl_probe_id_lookup(self, probe_name):
         #sql for methyl probe name
         methyl_probe_name_sql = 'select id from methyl_probe_name_lookup where probe_name = ?'
@@ -189,6 +200,7 @@ class SqliteLookup():
             return str(methyl_probe_result[0])
         else:
             return None
+
     def gwas_methyl_lookup_table_search(self, sample_name, by_gwas=True):
 
         if by_gwas:
@@ -229,6 +241,29 @@ class SqliteLookup():
             return_list.append(int(result[0]))
 
         return return_list
+
+    def get_methyl_probes_by_chromosome(self, chromosome):
+
+        sql = 'select probe_name from methyl_probe_name_lookup where chrm=?'
+
+        return_list = []
+
+        results = self.execute_lookup((sql, [chromosome]))
+
+        for result in results:
+
+            return_list.append(result[0])
+
+        return return_list
+
+    def get_methyl_probe_info_by_name(self, probe_name):
+
+        sql = 'select chrm, bp, probe_name from methyl_probe_name_lookup where probe_name = ?'
+
+        result = self.execute_lookup((sql, [probe_name]))
+
+        return result
+
 
 
 

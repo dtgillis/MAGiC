@@ -71,15 +71,11 @@ def run_logistic_regression():
         y,X = gemes_factory.get_gemes_data_set(snp_tuple[-1])
         if len(y) > 0:
             log_regressor = LogisticRegressor()
-            pearson_r_2 = log_regressor.grid_search(X, y)
-        else:
-            pearson_r_2 = .0
-
-        out_file = open(work_dir + os.sep + "log_reg_gemes.dat", 'a')
-
-        out_file.write('{0:s} {1:f}{2:s}'.format(snp_tuple[-1], pearson_r_2, os.linesep))
-
-        out_file.close()
+            pearson_r_2, best_params = log_regressor.grid_search(X, y)
+            out_file = open(work_dir + os.sep + "log_reg_gemes.dat", 'a')
+            out_file.write('{0:s} {1:f} penalty {2:s} C {3:f}{4:s}'.format(
+                snp_tuple[-1], pearson_r_2, best_params['penalty'], best_params['C'], os.linesep))
+            out_file.close()
 
 if __name__ == '__main__':
 
