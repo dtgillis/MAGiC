@@ -264,6 +264,14 @@ class SqliteLookup():
 
         return result
 
+    def get_methyl_probe_info_by_id(self, probe_id):
+
+        sql = 'select chrm, bp, probe_name from methyl_probe_name_lookup where id =?'
+
+        result = self.execute_lookup((sql, [probe_id]))
+
+        return result
+
 
 
 

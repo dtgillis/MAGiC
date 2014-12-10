@@ -77,6 +77,8 @@ def run_logistic_regression():
                 snp_tuple[-1], pearson_r_2, best_params['penalty'], best_params['C'], os.linesep))
             out_file.close()
 
+        snp_count += 1
+
 if __name__ == '__main__':
 
     run_logistic_regression()

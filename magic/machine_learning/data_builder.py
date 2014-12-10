@@ -139,7 +139,7 @@ class MachineLearningData():
                 # print self.snp_data.sample_list[gwas_index[0]]
                 return gwas_index, methyl_index
             else:
-                print "No Probe Data Supplied?"
+                return [], []
 
 
     def get_snp_as_Y(self, gwas_index):

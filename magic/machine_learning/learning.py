@@ -79,21 +79,23 @@ class LogisticRegressor():
 
 class DTC():
 
-    def __init__(self, snp_name):
-        self.snp_name = snp_name
-        self.classify = DecisionTreeClassifier(compute_importances=True)
+    def __init__(self):
+
+        self.classify = DecisionTreeClassifier()
 
     def grid_search(self, X, y):
 
         X = scale(X)
-        parameters = {'criterion': ['gini', 'entropy']}
-        clf = GridSearchCV(estimator=self.classify, param_grid=parameters, n_jobs=5, cv=5, refit=True,
+        parameters = {'criterion': ['gini', 'entropy'],
+                      'max_depth': range(1, 11),
+                      'min_samples_leaf': range(1, 5),
+                      'min_samples_split': range(1, 5)}
+        cv = StratifiedKFold(y=y, n_folds=5)
+
+        clf = GridSearchCV(estimator=self.classify, param_grid=parameters, n_jobs=5, cv=cv, refit=True,
                            scoring=make_scorer(clean_pearsonr))
         clf.fit(X, y)
-        print "Decision Tree"
-        print self.snp_name
-        print clf.best_estimator_
-        print clf.best_score_
+        return clf.best_score_, clf.best_params_
 
 
 

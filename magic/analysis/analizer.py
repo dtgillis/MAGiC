@@ -95,11 +95,17 @@ def plot_coefficients_for_snp(db_connection, methyl_parser, plink_executable,
         # get x coordinates
         plot_x = []
         snp_info = sqlite_seeker.snp_info_lookup(snp_name)
+        gemes_probes = sqlite_seeker.get_methyl_probes_in_geme_pair_by_snp_id(snp_info[0])
+        gemes_list = []
+        for methyl_id in gemes_probes:
+
+            gemes_list.append(sqlite_seeker.get_methyl_probe_info_by_id(methyl_id))
+
         for i, probe in enumerate(probe_names):
 
             probe_info = sqlite_seeker.get_methyl_probe_info_by_name(probe)
             plot_x.append(int(probe_info[1]))
-
+        plot_x = np.array(plot_x)
         y_max = 0
         y_min = 0
         for group, coeff_array in coeff.items():
@@ -110,10 +116,15 @@ def plot_coefficients_for_snp(db_connection, methyl_parser, plink_executable,
 
 
         for group, coeff_vec in plot_dict.items():
-            plt.plot(plot_x, coeff_vec, '.', label='Group {0:d}'.format(group))
+            probes = np.where(coeff_vec != .0)
+            if len(probes) != 0:
+                plt.plot(plot_x[probes[0]], coeff_vec[probes[0]], '.', label='Group {0:d}'.format(group))
 
-        print y_min, y_max, snp_info
         plt.vlines(snp_info[2], ymin=y_min, ymax=y_max)
+        for geme in gemes_list:
+
+            if geme[0] == u'9':
+                plt.vlines(geme[1], ymin=y_min, ymax=y_max, linestyles=u'dashed')
         plt.legend()
 
 
